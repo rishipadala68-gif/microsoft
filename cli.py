@@ -114,9 +114,48 @@ def ask(
     top: int = typer.Option(5, help="Top K past incidents to recall"),
 ):
     """Retrieval only: recall past incidents and print score breakdown table."""
+    from rich.table import Table
+
+    from app.memory.retrieval import HybridRetrievalEngine
+    from app.models import Cue
+
     console.print(f"[bold yellow]Recalling precedents for:[/bold yellow] '{query}'")
-    # Will be connected to app.memory.retrieval in Phase 3
-    console.print("[dim]Retrieval engine will be activated in Part 2 (Phase 3).[/dim]")
+    services = [service] if service else []
+    cue = Cue(text=query, services=services, error_messages=[query])
+
+    retriever = HybridRetrievalEngine()
+    result = retriever.recall(cue, top_k=top)
+
+    if not result.incidents:
+        console.print("[dim red]No relevant past incidents found in memory.[/dim red]")
+        return
+
+    table = Table(title="Recalled Precedents & Score Breakdown", show_header=True, header_style="bold magenta")
+    table.add_column("Incident ID", style="cyan", width=12)
+    table.add_column("Final Score", justify="right", style="green")
+    table.add_column("Vector", justify="right")
+    table.add_column("FTS", justify="right")
+    table.add_column("Fingerprint", justify="right")
+    table.add_column("Graph", justify="right")
+    table.add_column("Code", justify="right")
+    table.add_column("Matched On", style="yellow")
+    table.add_column("Flags", style="red")
+
+    for inc in result.incidents:
+        sb = inc.score_breakdown
+        table.add_row(
+            inc.id,
+            f"{inc.final:.4f}",
+            f"{sb.get('vec', 0.0):.3f}",
+            f"{sb.get('fts', 0.0):.3f}",
+            f"{sb.get('fp', 0.0):.1f}",
+            f"{sb.get('svc', 0.0):.2f}",
+            f"{sb.get('code', 0.0):.2f}",
+            ", ".join(inc.matched_on) or "-",
+            ", ".join(inc.flags) or "-",
+        )
+
+    console.print(table)
 
 
 @app.command()
