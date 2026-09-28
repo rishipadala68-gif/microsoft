@@ -1,0 +1,3 @@
+{"ts": "2024-03-18T09:00:00Z", "level": "WARN", "service": "cert-monitor", "msg": "Certificate api.example.com expires in 48h", "domain": "api.example.com", "days_remaining": 2}
+{"ts": "2024-03-18T09:01:00Z", "level": "ERROR", "service": "api-gateway", "msg": "SSL handshake warning: cert expiry imminent", "domain": "api.example.com"}
+{"ts": "2024-03-18T09:05:00Z", "level": "INFO", "service": "cert-monitor", "msg": "Auto-renewal attempt failed: rate limit exceeded", "error": "too many certificates already issued for this domain"}

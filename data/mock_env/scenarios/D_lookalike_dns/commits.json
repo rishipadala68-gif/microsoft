@@ -1,0 +1,3 @@
+[
+  {"sha": "abc123def456", "author": "ops@example.com", "message": "ops: drain node-42 for maintenance", "committed_at": "2024-03-22T10:55:00Z", "changed_files": ["ops/node-drain.sh"], "diff": "# node drain procedure"}
+]

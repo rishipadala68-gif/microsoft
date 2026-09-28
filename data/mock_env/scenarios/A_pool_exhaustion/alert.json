@@ -1,0 +1,16 @@
+{
+  "alert": "FIRING",
+  "alertname": "PostgresConnectionPoolExhausted",
+  "service": "payment-service",
+  "severity": "critical",
+  "summary": "PostgreSQL connection pool exhausted on payment-service",
+  "description": "All 100 connections in use. New requests are timing out after 30s. Error: could not obtain connection from the pool. FATAL: remaining connection slots are reserved for non-replication superuser connections",
+  "started_at": "2024-03-15T14:22:00Z",
+  "labels": {
+    "env": "production",
+    "region": "us-east-1",
+    "db": "payments-db",
+    "pool_size": "100",
+    "active_connections": "100"
+  }
+}

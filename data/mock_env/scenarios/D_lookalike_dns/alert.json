@@ -1,0 +1,15 @@
+{
+  "alert": "FIRING",
+  "alertname": "ServiceUnavailable",
+  "service": "order-service",
+  "severity": "critical",
+  "summary": "order-service cannot reach product-catalog: DNS resolution failed",
+  "description": "order-service is failing to resolve product-catalog.internal. Error: dial tcp: lookup product-catalog.internal: no such host. Connections to DB are healthy. This started after kube-dns pods were restarted during a node drain.",
+  "started_at": "2024-03-22T11:30:00Z",
+  "labels": {
+    "env": "production",
+    "region": "us-west-2",
+    "upstream": "product-catalog",
+    "dns_server": "kube-dns"
+  }
+}

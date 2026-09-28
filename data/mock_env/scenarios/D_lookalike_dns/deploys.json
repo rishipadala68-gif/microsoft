@@ -1,0 +1,3 @@
+[
+  {"service": "kube-system", "version": "1.29.2", "commit": "node-drain-patch", "deployed_at": "2024-03-22T11:00:00Z", "deployer": "ops-team", "status": "success", "notes": "node drain for maintenance, kube-dns restarted"}
+]

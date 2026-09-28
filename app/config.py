@@ -37,6 +37,7 @@ class Settings(BaseSettings):
     # Adapters
     ADAPTER_MODE: str = "mock"
     MOCK_SCENARIO: str = "A_pool_exhaustion"
+    MOCK_SCENARIO_DIR: str = "data/mock_env/scenarios"
     PROMETHEUS_URL: str = ""
     LOKI_URL: str = ""
     GITHUB_TOKEN: str = ""
@@ -56,5 +57,21 @@ class Settings(BaseSettings):
     # Safety
     ALLOW_ACTIONS: bool = False
 
+    # Claude model alias (investigate.py uses this)
+    CLAUDE_MODEL: str = "claude-sonnet-4-5"
+
 
 settings = Settings()
+
+
+from functools import lru_cache  # noqa: E402
+
+
+@lru_cache(maxsize=1)
+def get_settings() -> Settings:
+    """Return a cached Settings instance.
+
+    Use this in modules that need to be testable (monkeypatch env vars,
+    then call get_settings.cache_clear() to reload).
+    """
+    return Settings()

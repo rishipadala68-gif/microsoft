@@ -1,0 +1,4 @@
+[
+  {"service": "payment-service", "version": "2.4.1", "commit": "a1b2c3d", "deployed_at": "2024-03-15T13:45:00Z", "deployer": "ci-bot", "status": "success"},
+  {"service": "payment-service", "version": "2.4.0", "commit": "e4f5a6b", "deployed_at": "2024-03-14T10:00:00Z", "deployer": "alice", "status": "success"}
+]
