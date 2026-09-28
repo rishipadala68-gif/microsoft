@@ -1,0 +1,18 @@
+[
+  {
+    "user": "alice",
+    "text": "@oncall checkout-api is throwing errors in prod! Sev2 incident started."
+  },
+  {
+    "user": "bob",
+    "text": "Looking at logs now. Looks like certificate_expiry on checkout-api."
+  },
+  {
+    "user": "alice",
+    "text": "Found root cause in certificate_expiry. Applying fix and restarting."
+  },
+  {
+    "user": "bob",
+    "text": "Resolved. Latency returned to normal."
+  }
+]

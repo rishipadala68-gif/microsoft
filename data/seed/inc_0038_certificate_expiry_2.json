@@ -1,0 +1,21 @@
+{
+  "issues": [
+    {
+      "key": "OPS-38",
+      "fields": {
+        "summary": "Production Alert: web-frontend failure caused by certificate_expiry",
+        "description": "Service web-frontend reported critical errors. Root cause category is certificate_expiry.\nTrace:\nFile \"app/web-frontend/handler.py\", line 42, in process\nException: certificate_expiry exception occurred.",
+        "comment": {
+          "comments": [
+            {
+              "author": {
+                "displayName": "OnCall Engineer"
+              },
+              "body": "Mitigated issue by restarting web-frontend and applying runbook RB-db-pool-exhaustion."
+            }
+          ]
+        }
+      }
+    }
+  ]
+}

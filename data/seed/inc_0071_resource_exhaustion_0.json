@@ -1,0 +1,18 @@
+[
+  {
+    "user": "alice",
+    "text": "@oncall orders-service is throwing errors in prod! Sev2 incident started."
+  },
+  {
+    "user": "bob",
+    "text": "Looking at logs now. Looks like resource_exhaustion on orders-service."
+  },
+  {
+    "user": "alice",
+    "text": "Found root cause in resource_exhaustion. Applying fix and restarting."
+  },
+  {
+    "user": "bob",
+    "text": "Resolved. Latency returned to normal."
+  }
+]

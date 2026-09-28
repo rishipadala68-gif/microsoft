@@ -1,0 +1,21 @@
+{
+  "issues": [
+    {
+      "key": "OPS-75",
+      "fields": {
+        "summary": "Production Alert: notification-worker failure caused by resource_exhaustion",
+        "description": "Service notification-worker reported critical errors. Root cause category is resource_exhaustion.\nTrace:\nFile \"app/notification-worker/handler.py\", line 42, in process\nException: resource_exhaustion exception occurred.",
+        "comment": {
+          "comments": [
+            {
+              "author": {
+                "displayName": "OnCall Engineer"
+              },
+              "body": "Mitigated issue by restarting notification-worker and applying runbook RB-db-pool-exhaustion."
+            }
+          ]
+        }
+      }
+    }
+  ]
+}

@@ -1,0 +1,21 @@
+{
+  "issues": [
+    {
+      "key": "OPS-48",
+      "fields": {
+        "summary": "Production Alert: web-frontend failure caused by cache_issue",
+        "description": "Service web-frontend reported critical errors. Root cause category is cache_issue.\nTrace:\nFile \"app/web-frontend/handler.py\", line 42, in process\nException: cache_issue exception occurred.",
+        "comment": {
+          "comments": [
+            {
+              "author": {
+                "displayName": "OnCall Engineer"
+              },
+              "body": "Mitigated issue by restarting web-frontend and applying runbook RB-db-pool-exhaustion."
+            }
+          ]
+        }
+      }
+    }
+  ]
+}

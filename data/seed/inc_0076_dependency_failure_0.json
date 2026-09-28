@@ -1,0 +1,21 @@
+{
+  "issues": [
+    {
+      "key": "OPS-76",
+      "fields": {
+        "summary": "Production Alert: notification-worker failure caused by dependency_failure",
+        "description": "Service notification-worker reported critical errors. Root cause category is dependency_failure.\nTrace:\nFile \"app/notification-worker/handler.py\", line 42, in process\nException: dependency_failure exception occurred.",
+        "comment": {
+          "comments": [
+            {
+              "author": {
+                "displayName": "OnCall Engineer"
+              },
+              "body": "Mitigated issue by restarting notification-worker and applying runbook RB-db-pool-exhaustion."
+            }
+          ]
+        }
+      }
+    }
+  ]
+}

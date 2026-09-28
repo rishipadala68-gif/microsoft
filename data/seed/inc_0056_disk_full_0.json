@@ -1,0 +1,21 @@
+{
+  "issues": [
+    {
+      "key": "OPS-56",
+      "fields": {
+        "summary": "Production Alert: inventory-service failure caused by disk_full",
+        "description": "Service inventory-service reported critical errors. Root cause category is disk_full.\nTrace:\nFile \"app/inventory-service/handler.py\", line 42, in process\nException: disk_full exception occurred.",
+        "comment": {
+          "comments": [
+            {
+              "author": {
+                "displayName": "OnCall Engineer"
+              },
+              "body": "Mitigated issue by restarting inventory-service and applying runbook RB-db-pool-exhaustion."
+            }
+          ]
+        }
+      }
+    }
+  ]
+}

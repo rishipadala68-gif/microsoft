@@ -1,0 +1,21 @@
+{
+  "issues": [
+    {
+      "key": "OPS-51",
+      "fields": {
+        "summary": "Production Alert: notification-worker failure caused by memory_leak",
+        "description": "Service notification-worker reported critical errors. Root cause category is memory_leak.\nTrace:\nFile \"app/notification-worker/handler.py\", line 42, in process\nException: memory_leak exception occurred.",
+        "comment": {
+          "comments": [
+            {
+              "author": {
+                "displayName": "OnCall Engineer"
+              },
+              "body": "Mitigated issue by restarting notification-worker and applying runbook RB-db-pool-exhaustion."
+            }
+          ]
+        }
+      }
+    }
+  ]
+}
