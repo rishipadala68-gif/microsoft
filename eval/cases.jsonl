@@ -1,0 +1,12 @@
+{"query": "PostgreSQL connection pool exhausted payment service FATAL remaining connection slots reserved", "expected_ids": ["INC-0007"], "services": ["payment-service"]}
+{"query": "TLS certificate expiring SSL handshake error api.example.com", "expected_ids": ["INC-0012"], "services": ["api-gateway"]}
+{"query": "DNS resolution failed no such host kube-dns order service", "expected_ids": ["INC-0019"], "services": ["order-service"]}
+{"query": "Redis cache stampede thundering herd OOM", "expected_ids": ["INC-0024"], "services": ["cache"]}
+{"query": "database connection pool timeout could not obtain connection", "expected_ids": ["INC-0007", "INC-0031"], "services": ["payment-service"]}
+{"query": "certificate SSL TLS expired handshake failure", "expected_ids": ["INC-0012", "INC-0036"], "services": []}
+{"query": "lookup host no such host DNS resolution", "expected_ids": ["INC-0019", "INC-0041"], "services": []}
+{"query": "memory leak OOM killed high RSS node process", "expected_ids": ["INC-0051"], "services": []}
+{"query": "disk full no space left on device filesystem", "expected_ids": ["INC-0056"], "services": []}
+{"query": "bad deploy rollback canary failure error rate spike after deployment", "expected_ids": ["INC-0061"], "services": []}
+{"query": "queue backlog consumer lag growing messages piling up", "expected_ids": ["INC-0066"], "services": []}
+{"query": "connection refused upstream service unavailable 503", "expected_ids": ["INC-0076"], "services": []}

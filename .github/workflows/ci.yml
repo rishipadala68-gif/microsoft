@@ -1,0 +1,86 @@
+name: CI
+
+on:
+  push:
+    branches: ["**"]
+  pull_request:
+    branches: [main]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    services:
+      postgres:
+        image: pgvector/pgvector:pg16
+        env:
+          POSTGRES_USER: incident
+          POSTGRES_PASSWORD: incident
+          POSTGRES_DB: incident
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U incident"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+      redis:
+        image: redis:7
+        ports:
+          - 6379:6379
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    env:
+      DATABASE_URL: postgresql://incident:incident@localhost:5432/incident
+      REDIS_URL: redis://localhost:6379/0
+      ANTHROPIC_API_KEY: ""
+      API_KEY: test-key
+      EMBED_DIM: 384
+      ADAPTER_MODE: mock
+      MOCK_SCENARIO: A_pool_exhaustion
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python 3.12
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install uv
+        run: pip install uv
+
+      - name: Create venv and install dependencies
+        run: |
+          uv venv .venv
+          uv pip install --python .venv/bin/python \
+            fastapi uvicorn psycopg[binary,pool] pgvector redis \
+            pydantic pydantic-settings anthropic structlog tenacity \
+            typer rich httpx gitpython scikit-learn \
+            pytest pytest-asyncio anyio ruff
+
+      - name: Apply DB schema
+        run: |
+          PGPASSWORD=incident psql -h localhost -U incident -d incident -f db/schema.sql
+
+      - name: Lint
+        run: .venv/bin/ruff check .
+
+      - name: Run tests
+        run: PYTHONPATH=. .venv/bin/pytest tests/ -v --tb=short
+
+  lint-only:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install ruff
+      - run: ruff check .

@@ -171,29 +171,84 @@ def resolve(live_id: str, root_cause: str = "", steps: str = "", worked: bool = 
 
 
 @app.command()
-def consolidate():
+def consolidate(
+    half_life_days: int = typer.Option(365, help="Half life days for decay"),
+    distance_threshold: float = typer.Option(0.25, help="Clustering distance threshold"),
+    min_cluster: int = typer.Option(3, help="Minimum incidents per pattern cluster"),
+):
     """Run nightly consolidation job."""
-    console.print("Running consolidation job...")
+    from app.jobs.consolidate import run_consolidation
+
+    console.print("[bold cyan]Running consolidation job...[/bold cyan]")
+    stats = run_consolidation(
+        half_life_days=half_life_days,
+        distance_threshold=distance_threshold,
+        min_cluster=min_cluster,
+    )
+    console.print("[green]Consolidation complete![/green]")
+    console.print(f"  Incidents decayed: {stats.get('incidents_decayed', 0)}")
+    console.print(f"  Clusters found: {stats.get('clusters_found', 0)}")
+    console.print(f"  Patterns upserted: {stats.get('patterns_upserted', 0)}")
+    weak = stats.get("weak_runbooks", [])
+    if weak:
+        console.print(f"  [yellow]Weak runbooks identified: {len(weak)}[/yellow]")
+        for w in weak:
+            console.print(f"    - {w['id']} ({w['title']}): success rate {w['success_rate']:.1%}")
 
 
 @app.command()
-def eval():
+def eval(
+    k: int = typer.Option(3, help="Recall@k metric k"),
+    ablation: bool = typer.Option(True, help="Run ablation (vector-only & FTS-only)"),
+):
     """Run evaluation benchmark and ablation suite."""
-    console.print("Running evaluation suite...")
+    from app.eval.harness import run_eval
 
+    console.print(f"[bold cyan]Running evaluation suite (Recall@{k})...[/bold cyan]")
+    res = run_eval(k=k, ablation=ablation)
+    if "error" in res:
+        console.print(f"[bold red]Evaluation failed: {res['error']}[/bold red]")
+        return
 
-@app.command()
-def pr_check(files: list[str] = typer.Option(None), diff: str = typer.Option(None)):
-    """Check code changes against past outage files."""
-    console.print("Running PR check...")
+    hybrid_recall = res["hybrid"][f"recall@{k}"]
+    pass_status = "[bold green]PASS[/bold green]" if res.get("pass") else "[bold yellow]NEEDS IMPROVEMENT[/bold yellow]"
+    console.print(f"\n[bold]Hybrid Retrieval Recall@{k}:[/bold] {hybrid_recall:.2%} ({pass_status})")
+
+    if ablation:
+        vec_r = res.get("vector_only", {}).get(f"recall@{k}", 0.0)
+        fts_r = res.get("fts_only", {}).get(f"recall@{k}", 0.0)
+        console.print(f"[bold]Vector-only Recall@{k}:[/bold] {vec_r:.2%}")
+        console.print(f"[bold]FTS-only Recall@{k}:[/bold]    {fts_r:.2%}")
+        if res.get("beats_vector") and res.get("beats_fts"):
+            console.print("[bold green]✓ Hybrid retrieval strictly outperforms both vector-only and FTS-only![/bold green]")
 
 
 @app.command()
 def stats():
     """Display memory statistics, runbook success rates, and feedback ratios."""
+    from rich.table import Table
+
     store = MemoryStore()
-    console.print(f"Total Confirmed Incidents: {store.count_incidents()}")
-    console.print(f"Total Runbooks: {len(store.list_runbooks())}")
+    console.print(f"\n[bold]Total Confirmed Incidents:[/bold] {store.count_incidents()}")
+    patterns = store.list_patterns()
+    console.print(f"[bold]Discovered Patterns:[/bold] {len(patterns)}")
+
+    rbs = store.list_runbooks()
+    console.print(f"[bold]Total Runbooks:[/bold] {len(rbs)}\n")
+
+    if rbs:
+        table = Table(title="Runbook Performance")
+        table.add_column("Runbook ID", style="cyan")
+        table.add_column("Title")
+        table.add_column("Successes", justify="right")
+        table.add_column("Failures", justify="right")
+        table.add_column("Success Rate", justify="right")
+
+        for rb in rbs:
+            tot = rb.success_count + rb.failure_count
+            rate = f"{(rb.success_count / tot):.0%}" if tot > 0 else "N/A"
+            table.add_row(rb.id, rb.title, str(rb.success_count), str(rb.failure_count), rate)
+        console.print(table)
 
 
 @app.command()
