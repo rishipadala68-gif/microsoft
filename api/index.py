@@ -1,9 +1,22 @@
 import os
 import sys
 
-# Add repository root directory to sys.path so 'app' package can be imported on Vercel
+# Ensure repository root is in sys.path so 'app' package is found on Vercel
 root_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 if root_dir not in sys.path:
     sys.path.insert(0, root_dir)
 
-from app.api.main import app
+from app.api.main import app  # noqa: E402
+
+
+@app.get("/", include_in_schema=False)
+def root():
+    return {
+        "status": "ok",
+        "service": "Incident Response Agent API",
+        "docs": "/docs",
+        "health": "/healthz",
+    }
+
+
+handler = app
