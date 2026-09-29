@@ -37,8 +37,27 @@ class IngestionPipeline:
             metadata=doc.metadata,
         ))
 
-        # 3. Handle low confidence
-        if extracted.extraction_confidence == "low" and not accept_low:
+        # 3. Apply human-prefilled fields if present
+        prefilled = doc.metadata.get("prefilled", {})
+        if prefilled:
+            if prefilled.get("title"):
+                extracted.title = prefilled["title"]
+            if prefilled.get("root_cause"):
+                extracted.root_cause = prefilled["root_cause"]
+            if prefilled.get("resolution_steps"):
+                extracted.resolution_steps = prefilled["resolution_steps"]
+            if prefilled.get("runbooks_mentioned"):
+                extracted.runbooks_mentioned = prefilled["runbooks_mentioned"]
+            if prefilled.get("fix_worked") is not None:
+                extracted.fix_worked = prefilled["fix_worked"]
+            if prefilled.get("trigger_ref"):
+                extracted.trigger_ref = prefilled["trigger_ref"]
+            if prefilled.get("services"):
+                extracted.services = prefilled["services"]
+            extracted.extraction_confidence = "high"
+
+        # 4. Handle low confidence
+        if doc.source_type != "postmortem" and extracted.extraction_confidence == "low" and not accept_low:
             queue_file = self.review_queue_dir / f"{text_sha256[:12]}.json"
             queue_file.write_text(extracted.model_dump_json(indent=2), encoding="utf-8")
             logger.warn("low_confidence_queued", source_id=doc.source_id, path=str(queue_file))
