@@ -177,3 +177,99 @@ class LiveContext(BaseModel):
     services: list[str]
     events: list[WorkingMemoryEvent]
     hypotheses: list[Hypothesis] | None = None
+
+
+# --- Feedback & Stats Models ---
+
+class FeedbackCreate(BaseModel):
+    suggestion_id: int | None = None
+    runbook_id: str | None = None
+    helpful: bool
+    comment: str | None = None
+    user_ref: str | None = None
+
+
+class FeedbackRecord(BaseModel):
+    id: int
+    suggestion_id: int | None = None
+    runbook_id: str | None = None
+    helpful: bool
+    comment: str | None = None
+    user_ref: str | None = None
+    created_at: datetime | None = None
+
+
+class RunbookStats(BaseModel):
+    id: str
+    title: str
+    success_count: int
+    failure_count: int
+    p: float
+
+
+# --- Post-Mortem & Resolution Models ---
+
+class IncidentResolution(BaseModel):
+    root_cause: str
+    steps: list[str] = Field(default_factory=list)
+    runbook_ids: list[str] = Field(default_factory=list)
+    worked: bool = True
+    commit_or_deploy_ref: str | None = None
+    user_ref: str | None = None
+
+
+class PostmortemDraft(BaseModel):
+    summary: str
+    impact: str
+    timeline: list[dict[str, str]] = Field(default_factory=list)
+    root_cause: str
+    contributing_factors: list[str] = Field(default_factory=list)
+    what_worked: list[str] = Field(default_factory=list)
+    what_did_not_work: list[str] = Field(default_factory=list)
+    follow_ups: list[str] = Field(default_factory=list)
+    markdown: str
+
+
+class LiveIncident(BaseModel):
+    id: str
+    title: str
+    status: Literal["open", "resolved", "postmortem_draft", "confirmed"] = "open"
+    slack_channel: str | None = None
+    slack_thread_ts: str | None = None
+    created_at: datetime | None = None
+    resolved_at: datetime | None = None
+    resolution: dict[str, Any] | None = None
+    postmortem_draft: dict[str, Any] | None = None
+
+
+# --- Code Memory Models ---
+
+class CodeChangeRecord(BaseModel):
+    id: int | None = None
+    repo: str
+    commit_sha: str
+    author: str | None = None
+    committed_at: datetime | None = None
+    message: str | None = None
+    files: list[str] = Field(default_factory=list)
+    functions: list[str] = Field(default_factory=list)
+    diff_summary: str | None = None
+    emb: list[float] | None = None
+
+
+class PRMatch(BaseModel):
+    incident_id: str
+    incident_title: str
+    file_path: str
+    role: str = "involved"
+    weight: float = 1.0
+    why_matched: str
+    root_cause: str | None = None
+
+
+class PRCheckResult(BaseModel):
+    matches: list[PRMatch] = Field(default_factory=list)
+    risk_level: Literal["high", "medium", "low"]
+    summary: str
+    what_to_double_check: list[str] = Field(default_factory=list)
+

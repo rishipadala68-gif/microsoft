@@ -1,7 +1,16 @@
 import json
+from datetime import datetime
+from typing import Any
 
 from app.db import get_db_connection
-from app.models import Incident, Pattern, Runbook
+from app.models import (
+    CodeChangeRecord,
+    FeedbackRecord,
+    Incident,
+    LiveIncident,
+    Pattern,
+    Runbook,
+)
 
 
 class MemoryStore:
@@ -368,3 +377,356 @@ class MemoryStore:
                 )
                 for r in cur.fetchall()
             ]
+
+    # --- Runbook & Feedback Stats ---
+
+    def increment_runbook_stats(self, runbook_id: str, success: bool) -> None:
+        with get_db_connection() as conn, conn.cursor() as cur:
+            cur.execute(
+                """
+                UPDATE runbooks
+                SET success_count = success_count + CASE WHEN %s THEN 1 ELSE 0 END,
+                    failure_count = failure_count + CASE WHEN %s THEN 0 ELSE 1 END,
+                    updated_at = now()
+                WHERE id = %s;
+                """,
+                (success, success, runbook_id),
+            )
+            conn.commit()
+
+    def insert_feedback(
+        self,
+        suggestion_id: int | None,
+        runbook_id: str | None,
+        helpful: bool,
+        comment: str | None = None,
+        user_ref: str | None = None,
+    ) -> int:
+        with get_db_connection() as conn, conn.cursor() as cur:
+            cur.execute(
+                """
+                INSERT INTO feedback (suggestion_id, runbook_id, helpful, comment, user_ref)
+                VALUES (%s, %s, %s, %s, %s)
+                RETURNING id;
+                """,
+                (suggestion_id, runbook_id, helpful, comment, user_ref),
+            )
+            fb_id = cur.fetchone()["id"]
+            conn.commit()
+            return fb_id
+
+    def get_feedback_stats(self) -> dict[str, Any]:
+        with get_db_connection() as conn, conn.cursor() as cur:
+            cur.execute(
+                """
+                SELECT
+                    count(*) as total,
+                    count(*) FILTER (WHERE helpful = true) as helpful_count,
+                    count(*) FILTER (WHERE helpful = false) as not_helpful_count
+                FROM feedback;
+                """
+            )
+            row = cur.fetchone()
+            total = row["total"] if row else 0
+            helpful = row["helpful_count"] if row else 0
+            not_helpful = row["not_helpful_count"] if row else 0
+            ratio = (helpful / total) if total > 0 else 0.0
+            return {
+                "total": total,
+                "helpful": helpful,
+                "not_helpful": not_helpful,
+                "satisfaction_ratio": ratio,
+            }
+
+    def list_feedback(self, limit: int = 100) -> list[FeedbackRecord]:
+        with get_db_connection() as conn, conn.cursor() as cur:
+            cur.execute(
+                """
+                SELECT id, suggestion_id, runbook_id, helpful, comment, user_ref, created_at
+                FROM feedback
+                ORDER BY id DESC
+                LIMIT %s;
+                """,
+                (limit,),
+            )
+            return [
+                FeedbackRecord(
+                    id=r["id"],
+                    suggestion_id=r["suggestion_id"],
+                    runbook_id=r["runbook_id"],
+                    helpful=r["helpful"],
+                    comment=r["comment"],
+                    user_ref=r["user_ref"],
+                    created_at=r["created_at"],
+                )
+                for r in cur.fetchall()
+            ]
+
+    # --- Live Incidents ---
+
+    def upsert_live_incident(
+        self,
+        live_id: str,
+        title: str,
+        slack_channel: str | None = None,
+        slack_thread_ts: str | None = None,
+    ) -> None:
+        with get_db_connection() as conn, conn.cursor() as cur:
+            cur.execute(
+                """
+                INSERT INTO live_incidents (id, title, status, slack_channel, slack_thread_ts)
+                VALUES (%s, %s, 'open', %s, %s)
+                ON CONFLICT (id) DO UPDATE
+                SET title = EXCLUDED.title,
+                    slack_channel = COALESCE(EXCLUDED.slack_channel, live_incidents.slack_channel),
+                    slack_thread_ts = COALESCE(EXCLUDED.slack_thread_ts, live_incidents.slack_thread_ts);
+                """,
+                (live_id, title, slack_channel, slack_thread_ts),
+            )
+            conn.commit()
+
+    def get_live_incident(self, live_id: str) -> LiveIncident | None:
+        with get_db_connection() as conn, conn.cursor() as cur:
+            cur.execute("SELECT * FROM live_incidents WHERE id = %s;", (live_id,))
+            r = cur.fetchone()
+            if not r:
+                return None
+            res = r["resolution"] if isinstance(r["resolution"], dict) else (json.loads(r["resolution"]) if r["resolution"] else None)
+            draft = r["postmortem_draft"] if isinstance(r["postmortem_draft"], dict) else (json.loads(r["postmortem_draft"]) if r["postmortem_draft"] else None)
+            return LiveIncident(
+                id=r["id"],
+                title=r["title"],
+                status=r["status"],
+                slack_channel=r["slack_channel"],
+                slack_thread_ts=r["slack_thread_ts"],
+                created_at=r["created_at"],
+                resolved_at=r["resolved_at"],
+                resolution=res,
+                postmortem_draft=draft,
+            )
+
+    def set_live_incident_resolution(self, live_id: str, resolution: dict[str, Any]) -> None:
+        with get_db_connection() as conn, conn.cursor() as cur:
+            cur.execute(
+                """
+                UPDATE live_incidents
+                SET resolution = %s,
+                    status = 'resolved',
+                    resolved_at = now()
+                WHERE id = %s;
+                """,
+                (json.dumps(resolution), live_id),
+            )
+            conn.commit()
+
+    def set_live_incident_postmortem(self, live_id: str, postmortem: dict[str, Any]) -> None:
+        with get_db_connection() as conn, conn.cursor() as cur:
+            cur.execute(
+                """
+                UPDATE live_incidents
+                SET postmortem_draft = %s,
+                    status = 'postmortem_draft'
+                WHERE id = %s;
+                """,
+                (json.dumps(postmortem), live_id),
+            )
+            conn.commit()
+
+    def update_live_incident_status(self, live_id: str, status: str) -> None:
+        with get_db_connection() as conn, conn.cursor() as cur:
+            cur.execute(
+                "UPDATE live_incidents SET status = %s WHERE id = %s;",
+                (status, live_id),
+            )
+            conn.commit()
+
+    # --- Code Memory ---
+
+    def upsert_code_change(
+        self,
+        repo: str,
+        commit_sha: str,
+        author: str | None = None,
+        committed_at: datetime | None = None,
+        message: str | None = None,
+        files: list[str] | None = None,
+        functions: list[str] | None = None,
+        diff_summary: str | None = None,
+        emb: list[float] | None = None,
+    ) -> int:
+        with get_db_connection() as conn, conn.cursor() as cur:
+            emb_val = emb if emb else None
+            cur.execute(
+                """
+                INSERT INTO code_changes (repo, commit_sha, author, committed_at, message, files, functions, diff_summary, emb)
+                VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)
+                ON CONFLICT (repo, commit_sha) DO UPDATE
+                SET author = EXCLUDED.author,
+                    committed_at = EXCLUDED.committed_at,
+                    message = EXCLUDED.message,
+                    files = EXCLUDED.files,
+                    functions = EXCLUDED.functions,
+                    diff_summary = COALESCE(EXCLUDED.diff_summary, code_changes.diff_summary),
+                    emb = COALESCE(EXCLUDED.emb, code_changes.emb)
+                RETURNING id;
+                """,
+                (repo, commit_sha, author, committed_at, message, files or [], functions or [], diff_summary, emb_val),
+            )
+            change_id = cur.fetchone()["id"]
+            conn.commit()
+            return change_id
+
+    def get_code_change_by_sha(self, commit_sha: str, repo: str = "default") -> CodeChangeRecord | None:
+        with get_db_connection() as conn, conn.cursor() as cur:
+            cur.execute("SELECT * FROM code_changes WHERE commit_sha = %s;", (commit_sha,))
+            r = cur.fetchone()
+            if not r:
+                return None
+            return CodeChangeRecord(
+                id=r["id"],
+                repo=r["repo"],
+                commit_sha=r["commit_sha"],
+                author=r["author"],
+                committed_at=r["committed_at"],
+                message=r["message"],
+                files=r["files"] or [],
+                functions=r["functions"] or [],
+                diff_summary=r["diff_summary"],
+                emb=list(r["emb"]) if r.get("emb") is not None else None,
+            )
+
+    def count_code_changes(self) -> int:
+        with get_db_connection() as conn, conn.cursor() as cur:
+            cur.execute("SELECT count(*) FROM code_changes;")
+            return cur.fetchone()["count"]
+
+    def link_incident_code(
+        self,
+        incident_id: str,
+        commit_sha: str,
+        repo: str = "default",
+        link_type: str = "caused_by",
+    ) -> None:
+        with get_db_connection() as conn, conn.cursor() as cur:
+            # Check or create code_change
+            cur.execute("SELECT id FROM code_changes WHERE commit_sha = %s;", (commit_sha,))
+            row = cur.fetchone()
+            if not row:
+                cur.execute(
+                    """
+                    INSERT INTO code_changes (repo, commit_sha, message)
+                    VALUES (%s, %s, %s)
+                    RETURNING id;
+                    """,
+                    (repo, commit_sha, f"Referenced in {incident_id}"),
+                )
+                code_change_id = cur.fetchone()["id"]
+            else:
+                code_change_id = row["id"]
+
+            cur.execute(
+                """
+                INSERT INTO incident_code_links (incident_id, code_change_id, link_type)
+                VALUES (%s, %s, %s)
+                ON CONFLICT DO NOTHING;
+                """,
+                (incident_id, code_change_id, link_type),
+            )
+            conn.commit()
+
+    def get_incident_files_by_paths(self, file_paths: list[str]) -> list[dict[str, Any]]:
+        if not file_paths:
+            return []
+        basenames = [p.replace("\\", "/").split("/")[-1] for p in file_paths]
+        with get_db_connection() as conn, conn.cursor() as cur:
+            cur.execute(
+                """
+                SELECT f.incident_id, f.file_path, f.function_name, f.role, i.title, i.weight, i.root_cause
+                FROM incident_files f
+                JOIN incidents i ON f.incident_id = i.id
+                WHERE f.file_path = ANY(%s) OR substring(f.file_path from '[^/]+$') = ANY(%s)
+                ORDER BY CASE WHEN f.role = 'root_cause' THEN 1 ELSE 2 END, i.weight DESC;
+                """,
+                (file_paths, basenames),
+            )
+            return [dict(r) for r in cur.fetchall()]
+
+    def find_code_changes_by_emb_similarity(
+        self,
+        emb: list[float],
+        threshold: float = 0.8,
+        limit: int = 10,
+    ) -> list[dict[str, Any]]:
+        with get_db_connection() as conn, conn.cursor() as cur:
+            cur.execute(
+                """
+                SELECT c.id, c.repo, c.commit_sha, c.message, c.files, 1 - (c.emb <=> %s::vector) AS sim,
+                       l.incident_id, l.link_type, i.title as incident_title, i.root_cause
+                FROM code_changes c
+                LEFT JOIN incident_code_links l ON c.id = l.code_change_id
+                LEFT JOIN incidents i ON l.incident_id = i.id
+                WHERE c.emb IS NOT NULL AND (1 - (c.emb <=> %s::vector)) >= %s
+                ORDER BY sim DESC
+                LIMIT %s;
+                """,
+                (emb, emb, threshold, limit),
+            )
+            return [dict(r) for r in cur.fetchall()]
+
+    # --- Suggestions ---
+
+    def insert_suggestion(
+        self,
+        live_incident_id: str,
+        query_text: str,
+        retrieved: Any,
+        response: Any,
+        model: str = "",
+        latency_ms: int = 0,
+    ) -> int:
+        with get_db_connection() as conn, conn.cursor() as cur:
+            cur.execute(
+                """
+                INSERT INTO suggestions (live_incident_id, query_text, retrieved, response, model, latency_ms)
+                VALUES (%s, %s, %s, %s, %s, %s)
+                RETURNING id;
+                """,
+                (
+                    live_incident_id,
+                    query_text,
+                    json.dumps(retrieved) if not isinstance(retrieved, str) else retrieved,
+                    json.dumps(response) if not isinstance(response, str) else response,
+                    model,
+                    latency_ms,
+                ),
+            )
+            sugg_id = cur.fetchone()["id"]
+            conn.commit()
+            return sugg_id
+
+    def update_suggestion_response(self, suggestion_id: int, response: dict[str, Any]) -> None:
+        with get_db_connection() as conn, conn.cursor() as cur:
+            cur.execute(
+                "UPDATE suggestions SET response = %s WHERE id = %s;",
+                (json.dumps(response), suggestion_id),
+            )
+            conn.commit()
+
+    def get_suggestion(self, suggestion_id: int) -> dict[str, Any] | None:
+        with get_db_connection() as conn, conn.cursor() as cur:
+            cur.execute("SELECT * FROM suggestions WHERE id = %s;", (suggestion_id,))
+            r = cur.fetchone()
+            if not r:
+                return None
+            res = r["response"] if isinstance(r["response"], dict) else (json.loads(r["response"]) if r["response"] else {})
+            ret = r["retrieved"] if isinstance(r["retrieved"], (dict, list)) else (json.loads(r["retrieved"]) if r["retrieved"] else {})
+            return {
+                "id": r["id"],
+                "live_incident_id": r["live_incident_id"],
+                "created_at": r["created_at"],
+                "query_text": r["query_text"],
+                "retrieved": ret,
+                "response": res,
+                "model": r["model"],
+                "latency_ms": r["latency_ms"],
+            }

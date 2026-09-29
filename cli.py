@@ -165,9 +165,46 @@ def investigate(scenario: str = typer.Option("A_pool_exhaustion", help="Demo sce
 
 
 @app.command()
-def resolve(live_id: str, root_cause: str = "", steps: str = "", worked: bool = True):
+def resolve(
+    live_id: str = typer.Argument(..., help="Live incident ID (e.g. LIVE-20260929-001)"),
+    root_cause: str = typer.Option(..., help="Identified root cause"),
+    steps: str = typer.Option(..., help="Steps taken to mitigate/resolve"),
+    worked: bool = typer.Option(True, help="Did the resolution work?"),
+    runbooks: list[str] = typer.Option(None, help="Runbook IDs executed"),
+    ref: str = typer.Option(None, help="Commit sha or deploy tag involved"),
+    confirm: bool = typer.Option(True, help="Auto-confirm post-mortem to memory"),
+):
     """Resolve an incident, generate post-mortem, and write back to memory."""
-    console.print(f"Resolving incident {live_id}...")
+    from app.agent.postmortem import confirm_postmortem, draft_postmortem, resolve_incident
+    from app.memory.store import MemoryStore
+
+    console.print(f"[bold cyan]Resolving incident {live_id}...[/bold cyan]")
+    store = MemoryStore()
+    step_list = [s.strip() for s in steps.split(";") if s.strip()] if steps else ["Service restored"]
+    rb_list = runbooks or []
+
+    # 1. Resolve
+    resolve_incident(
+        live_id=live_id,
+        root_cause=root_cause,
+        steps=step_list,
+        runbook_ids=rb_list,
+        worked=worked,
+        commit_or_deploy_ref=ref,
+        store=store,
+    )
+    console.print("[green]Incident status updated to 'resolved' (Redis keys expire in 72h).[/green]")
+
+    # 2. Draft post-mortem
+    draft = draft_postmortem(live_id=live_id, store=store)
+    console.print(f"[bold yellow]Drafted Post-Mortem:[/bold yellow]\n{draft.get('summary')}")
+
+    # 3. Confirm to memory
+    if confirm:
+        inc = confirm_postmortem(live_id=live_id, store=store)
+        console.print(f"[bold green]Post-mortem confirmed and ingested as {inc.id}: {inc.title}[/bold green]")
+    else:
+        console.print("[yellow]Post-mortem draft saved. Run with --confirm to ingest into memory.[/yellow]")
 
 
 @app.command()
@@ -183,17 +220,89 @@ def eval():
 
 
 @app.command()
-def pr_check(files: list[str] = typer.Option(None), diff: str = typer.Option(None)):
+def pr_check(
+    files: list[str] = typer.Option(None, help="List of modified files to check"),
+    diff: str = typer.Option(None, help="Path to diff file"),
+    summarize: bool = typer.Option(False, help="Generate LLM risk summary"),
+):
     """Check code changes against past outage files."""
-    console.print("Running PR check...")
+    from rich.table import Table
+
+    from app.code_memory.pr_check import check_pr
+
+    diff_text = None
+    if diff:
+        diff_path = Path(diff)
+        if diff_path.exists():
+            diff_text = diff_path.read_text(encoding="utf-8")
+        else:
+            console.print(f"[red]Diff file {diff} not found.[/red]")
+            return
+
+    result = check_pr(files=files, diff_text=diff_text, summarize=summarize)
+
+    color = "red" if result.risk_level == "high" else ("yellow" if result.risk_level == "medium" else "green")
+    console.print(f"\n[bold {color}]Risk Level: {result.risk_level.upper()}[/bold {color}]")
+    console.print(f"[bold]{result.summary}[/bold]\n")
+
+    if result.matches:
+        table = Table(title="Historical Incidents Touching Changed Code", show_header=True, header_style="bold magenta")
+        table.add_column("Incident ID", style="cyan", width=12)
+        table.add_column("File / Commit", style="yellow")
+        table.add_column("Role", style="bold")
+        table.add_column("Why Matched")
+
+        for m in result.matches:
+            role_style = "red" if m.role == "root_cause" else "blue"
+            table.add_row(
+                m.incident_id,
+                m.file_path,
+                f"[{role_style}]{m.role}[/{role_style}]",
+                m.why_matched,
+            )
+        console.print(table)
+
+    console.print("\n[bold]What to Double-Check:[/bold]")
+    for bullet in result.what_to_double_check:
+        console.print(f"• {bullet}")
 
 
 @app.command()
 def stats():
     """Display memory statistics, runbook success rates, and feedback ratios."""
-    store = MemoryStore()
-    console.print(f"Total Confirmed Incidents: {store.count_incidents()}")
-    console.print(f"Total Runbooks: {len(store.list_runbooks())}")
+    from rich.table import Table
+
+    from app.memory.stats import get_memory_stats
+
+    stats_data = get_memory_stats()
+    console.print("\n[bold magenta]=== Incident Response Agent Memory Statistics ===[/bold magenta]")
+    console.print(f"Confirmed Incidents in Memory: [bold green]{stats_data['incident_count']}[/bold green]")
+    console.print(f"Runbooks in Library:          [bold green]{stats_data['runbook_count']}[/bold green]")
+    console.print(f"Indexed Code Changes:         [bold green]{stats_data['code_changes_count']}[/bold green]")
+
+    fb = stats_data.get("feedback", {})
+    console.print(f"Feedback Count:               [bold]{fb.get('total', 0)}[/bold] (Helpful: {fb.get('helpful', 0)}, Not helpful: {fb.get('not_helpful', 0)}, Satisfaction: {fb.get('satisfaction_ratio', 0.0):.1%})")
+
+    weak = stats_data.get("weak_runbooks", [])
+    if weak:
+        table = Table(title="Weakest Runbooks (p < 0.3, >= 5 samples)", show_header=True, header_style="bold red")
+        table.add_column("Runbook ID", style="cyan")
+        table.add_column("Title")
+        table.add_column("Successes", justify="right")
+        table.add_column("Failures", justify="right")
+        table.add_column("Smoothed p", justify="right", style="bold red")
+
+        for r in weak:
+            table.add_row(
+                r["id"],
+                r["title"],
+                str(r["success_count"]),
+                str(r["failure_count"]),
+                f"{r['p']:.3f}",
+            )
+        console.print(table)
+    else:
+        console.print("[green]No weak runbooks detected (all active runbooks meet confidence thresholds).[/green]")
 
 
 @app.command()
