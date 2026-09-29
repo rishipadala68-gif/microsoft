@@ -19,4 +19,3 @@ def root():
     }
 
 
-handler = app
