@@ -1,0 +1,21 @@
+{
+  "issues": [
+    {
+      "key": "OPS-72",
+      "fields": {
+        "summary": "Production Alert: checkout-api failure caused by resource_exhaustion",
+        "description": "Service checkout-api reported critical errors. Root cause category is resource_exhaustion.\nTrace:\nFile \"app/checkout-api/handler.py\", line 42, in process\nException: resource_exhaustion exception occurred.",
+        "comment": {
+          "comments": [
+            {
+              "author": {
+                "displayName": "OnCall Engineer"
+              },
+              "body": "Mitigated issue by restarting checkout-api and applying runbook RB-db-pool-exhaustion."
+            }
+          ]
+        }
+      }
+    }
+  ]
+}

@@ -1,0 +1,14 @@
+{
+  "alert": "FIRING",
+  "alertname": "UnknownServiceDegradation",
+  "service": "recommendation-engine",
+  "severity": "high",
+  "summary": "recommendation-engine response time increased 10x with no known cause",
+  "description": "P99 latency jumped from 80ms to 900ms at 2024-04-01T03:00:00Z. No deploys in last 72h. No upstream alerts. CPU and memory nominal. Error logs show occasional 'context deadline exceeded' but no clear pattern. This does not match any known failure mode.",
+  "started_at": "2024-04-01T03:00:00Z",
+  "labels": {
+    "env": "production",
+    "region": "eu-west-1",
+    "service": "recommendation-engine"
+  }
+}

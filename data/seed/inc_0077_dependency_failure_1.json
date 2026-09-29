@@ -1,0 +1,21 @@
+{
+  "issues": [
+    {
+      "key": "OPS-77",
+      "fields": {
+        "summary": "Production Alert: orders-service failure caused by dependency_failure",
+        "description": "Service orders-service reported critical errors. Root cause category is dependency_failure.\nTrace:\nFile \"app/orders-service/handler.py\", line 42, in process\nException: dependency_failure exception occurred.",
+        "comment": {
+          "comments": [
+            {
+              "author": {
+                "displayName": "OnCall Engineer"
+              },
+              "body": "Mitigated issue by restarting orders-service and applying runbook RB-db-pool-exhaustion."
+            }
+          ]
+        }
+      }
+    }
+  ]
+}

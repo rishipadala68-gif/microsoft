@@ -1,0 +1,21 @@
+{
+  "issues": [
+    {
+      "key": "OPS-62",
+      "fields": {
+        "summary": "Production Alert: web-frontend failure caused by bad_deploy",
+        "description": "Service web-frontend reported critical errors. Root cause category is bad_deploy.\nTrace:\nFile \"app/web-frontend/handler.py\", line 42, in process\nException: bad_deploy exception occurred.",
+        "comment": {
+          "comments": [
+            {
+              "author": {
+                "displayName": "OnCall Engineer"
+              },
+              "body": "Mitigated issue by restarting web-frontend and applying runbook RB-db-pool-exhaustion."
+            }
+          ]
+        }
+      }
+    }
+  ]
+}

@@ -1,0 +1,4 @@
+{"ts": "2024-04-01T03:00:00Z", "level": "WARN", "service": "recommendation-engine", "msg": "context deadline exceeded", "latency_ms": 910}
+{"ts": "2024-04-01T03:00:30Z", "level": "WARN", "service": "recommendation-engine", "msg": "context deadline exceeded", "latency_ms": 870}
+{"ts": "2024-04-01T03:01:00Z", "level": "INFO", "service": "recommendation-engine", "msg": "CPU: 22%, Memory: 41%, no anomaly detected in resource usage"}
+{"ts": "2024-04-01T03:02:00Z", "level": "WARN", "service": "recommendation-engine", "msg": "Slow external call to feature-store", "duration_ms": 800}

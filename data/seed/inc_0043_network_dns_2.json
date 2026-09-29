@@ -1,0 +1,21 @@
+{
+  "issues": [
+    {
+      "key": "OPS-43",
+      "fields": {
+        "summary": "Production Alert: orders-service failure caused by network_dns",
+        "description": "Service orders-service reported critical errors. Root cause category is network_dns.\nTrace:\nFile \"app/orders-service/handler.py\", line 42, in process\nException: network_dns exception occurred.",
+        "comment": {
+          "comments": [
+            {
+              "author": {
+                "displayName": "OnCall Engineer"
+              },
+              "body": "Mitigated issue by restarting orders-service and applying runbook RB-db-pool-exhaustion."
+            }
+          ]
+        }
+      }
+    }
+  ]
+}

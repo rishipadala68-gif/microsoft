@@ -1,0 +1,258 @@
+{
+  "inc_0007_pool_exhaustion.md": {
+    "root_cause_category": "connection_pool",
+    "lookalike_partner": "inc_0019_dns_failure.md"
+  },
+  "inc_0012_cert_expiry.md": {
+    "root_cause_category": "certificate_expiry",
+    "lookalike_partner": null
+  },
+  "inc_0019_dns_failure.md": {
+    "root_cause_category": "network_dns",
+    "lookalike_partner": "inc_0007_pool_exhaustion.md"
+  },
+  "inc_0024_cache_stampede.md": {
+    "root_cause_category": "cache_issue",
+    "lookalike_partner": null
+  },
+  "lookalike_1_connection_pool.md": {
+    "root_cause_category": "connection_pool",
+    "lookalike_partner": "lookalike_1_connection_pool"
+  },
+  "lookalike_2_network_dns.md": {
+    "root_cause_category": "network_dns",
+    "lookalike_partner": "lookalike_0_network_dns"
+  },
+  "lookalike_3_memory_leak.md": {
+    "root_cause_category": "memory_leak",
+    "lookalike_partner": "lookalike_3_memory_leak"
+  },
+  "lookalike_4_queue_backlog.md": {
+    "root_cause_category": "queue_backlog",
+    "lookalike_partner": "lookalike_2_queue_backlog"
+  },
+  "lookalike_5_certificate_expiry.md": {
+    "root_cause_category": "certificate_expiry",
+    "lookalike_partner": "lookalike_5_certificate_expiry"
+  },
+  "lookalike_6_dependency_failure.md": {
+    "root_cause_category": "dependency_failure",
+    "lookalike_partner": "lookalike_4_dependency_failure"
+  },
+  "inc_0031_connection_pool_0.json": {
+    "root_cause_category": "connection_pool",
+    "lookalike_partner": null
+  },
+  "inc_0032_connection_pool_1.json": {
+    "root_cause_category": "connection_pool",
+    "lookalike_partner": null
+  },
+  "inc_0033_connection_pool_2.json": {
+    "root_cause_category": "connection_pool",
+    "lookalike_partner": null
+  },
+  "inc_0034_connection_pool_3.json": {
+    "root_cause_category": "connection_pool",
+    "lookalike_partner": null
+  },
+  "inc_0035_connection_pool_4.json": {
+    "root_cause_category": "connection_pool",
+    "lookalike_partner": null
+  },
+  "inc_0036_certificate_expiry_0.json": {
+    "root_cause_category": "certificate_expiry",
+    "lookalike_partner": null
+  },
+  "inc_0037_certificate_expiry_1.json": {
+    "root_cause_category": "certificate_expiry",
+    "lookalike_partner": null
+  },
+  "inc_0038_certificate_expiry_2.json": {
+    "root_cause_category": "certificate_expiry",
+    "lookalike_partner": null
+  },
+  "inc_0039_certificate_expiry_3.md": {
+    "root_cause_category": "certificate_expiry",
+    "lookalike_partner": null
+  },
+  "inc_0040_certificate_expiry_4.json": {
+    "root_cause_category": "certificate_expiry",
+    "lookalike_partner": null
+  },
+  "inc_0041_network_dns_0.md": {
+    "root_cause_category": "network_dns",
+    "lookalike_partner": null
+  },
+  "inc_0042_network_dns_1.md": {
+    "root_cause_category": "network_dns",
+    "lookalike_partner": null
+  },
+  "inc_0043_network_dns_2.json": {
+    "root_cause_category": "network_dns",
+    "lookalike_partner": null
+  },
+  "inc_0044_network_dns_3.json": {
+    "root_cause_category": "network_dns",
+    "lookalike_partner": null
+  },
+  "inc_0045_network_dns_4.json": {
+    "root_cause_category": "network_dns",
+    "lookalike_partner": null
+  },
+  "inc_0046_cache_issue_0.json": {
+    "root_cause_category": "cache_issue",
+    "lookalike_partner": null
+  },
+  "inc_0047_cache_issue_1.json": {
+    "root_cause_category": "cache_issue",
+    "lookalike_partner": null
+  },
+  "inc_0048_cache_issue_2.json": {
+    "root_cause_category": "cache_issue",
+    "lookalike_partner": null
+  },
+  "inc_0049_cache_issue_3.json": {
+    "root_cause_category": "cache_issue",
+    "lookalike_partner": null
+  },
+  "inc_0050_cache_issue_4.json": {
+    "root_cause_category": "cache_issue",
+    "lookalike_partner": null
+  },
+  "inc_0051_memory_leak_0.json": {
+    "root_cause_category": "memory_leak",
+    "lookalike_partner": null
+  },
+  "inc_0052_memory_leak_1.json": {
+    "root_cause_category": "memory_leak",
+    "lookalike_partner": null
+  },
+  "inc_0053_memory_leak_2.json": {
+    "root_cause_category": "memory_leak",
+    "lookalike_partner": null
+  },
+  "inc_0054_memory_leak_3.md": {
+    "root_cause_category": "memory_leak",
+    "lookalike_partner": null
+  },
+  "inc_0055_memory_leak_4.json": {
+    "root_cause_category": "memory_leak",
+    "lookalike_partner": null
+  },
+  "inc_0056_disk_full_0.json": {
+    "root_cause_category": "disk_full",
+    "lookalike_partner": null
+  },
+  "inc_0057_disk_full_1.md": {
+    "root_cause_category": "disk_full",
+    "lookalike_partner": null
+  },
+  "inc_0058_disk_full_2.json": {
+    "root_cause_category": "disk_full",
+    "lookalike_partner": null
+  },
+  "inc_0059_disk_full_3.md": {
+    "root_cause_category": "disk_full",
+    "lookalike_partner": null
+  },
+  "inc_0060_disk_full_4.json": {
+    "root_cause_category": "disk_full",
+    "lookalike_partner": null
+  },
+  "inc_0061_bad_deploy_0.json": {
+    "root_cause_category": "bad_deploy",
+    "lookalike_partner": null
+  },
+  "inc_0062_bad_deploy_1.json": {
+    "root_cause_category": "bad_deploy",
+    "lookalike_partner": null
+  },
+  "inc_0063_bad_deploy_2.md": {
+    "root_cause_category": "bad_deploy",
+    "lookalike_partner": null
+  },
+  "inc_0064_bad_deploy_3.json": {
+    "root_cause_category": "bad_deploy",
+    "lookalike_partner": null
+  },
+  "inc_0065_bad_deploy_4.md": {
+    "root_cause_category": "bad_deploy",
+    "lookalike_partner": null
+  },
+  "inc_0066_queue_backlog_0.json": {
+    "root_cause_category": "queue_backlog",
+    "lookalike_partner": null
+  },
+  "inc_0067_queue_backlog_1.md": {
+    "root_cause_category": "queue_backlog",
+    "lookalike_partner": null
+  },
+  "inc_0068_queue_backlog_2.json": {
+    "root_cause_category": "queue_backlog",
+    "lookalike_partner": null
+  },
+  "inc_0069_queue_backlog_3.json": {
+    "root_cause_category": "queue_backlog",
+    "lookalike_partner": null
+  },
+  "inc_0070_queue_backlog_4.md": {
+    "root_cause_category": "queue_backlog",
+    "lookalike_partner": null
+  },
+  "inc_0071_resource_exhaustion_0.json": {
+    "root_cause_category": "resource_exhaustion",
+    "lookalike_partner": null
+  },
+  "inc_0072_resource_exhaustion_1.json": {
+    "root_cause_category": "resource_exhaustion",
+    "lookalike_partner": null
+  },
+  "inc_0073_resource_exhaustion_2.md": {
+    "root_cause_category": "resource_exhaustion",
+    "lookalike_partner": null
+  },
+  "inc_0074_resource_exhaustion_3.json": {
+    "root_cause_category": "resource_exhaustion",
+    "lookalike_partner": null
+  },
+  "inc_0075_resource_exhaustion_4.json": {
+    "root_cause_category": "resource_exhaustion",
+    "lookalike_partner": null
+  },
+  "inc_0076_dependency_failure_0.json": {
+    "root_cause_category": "dependency_failure",
+    "lookalike_partner": null
+  },
+  "inc_0077_dependency_failure_1.json": {
+    "root_cause_category": "dependency_failure",
+    "lookalike_partner": null
+  },
+  "inc_0078_dependency_failure_2.json": {
+    "root_cause_category": "dependency_failure",
+    "lookalike_partner": null
+  },
+  "inc_0079_dependency_failure_3.md": {
+    "root_cause_category": "dependency_failure",
+    "lookalike_partner": null
+  },
+  "inc_0080_dependency_failure_4.md": {
+    "root_cause_category": "dependency_failure",
+    "lookalike_partner": null
+  },
+  "near_duplicate_1.md": {
+    "root_cause_category": "connection_pool",
+    "lookalike_partner": "inc_0007_pool_exhaustion.md"
+  },
+  "near_duplicate_2.md": {
+    "root_cause_category": "connection_pool",
+    "lookalike_partner": "inc_0007_pool_exhaustion.md"
+  },
+  "near_duplicate_3.md": {
+    "root_cause_category": "connection_pool",
+    "lookalike_partner": "inc_0007_pool_exhaustion.md"
+  },
+  "near_duplicate_4.md": {
+    "root_cause_category": "connection_pool",
+    "lookalike_partner": "inc_0007_pool_exhaustion.md"
+  }
+}

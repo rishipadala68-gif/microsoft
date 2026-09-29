@@ -1,0 +1,21 @@
+{
+  "issues": [
+    {
+      "key": "OPS-31",
+      "fields": {
+        "summary": "Production Alert: notification-worker failure caused by connection_pool",
+        "description": "Service notification-worker reported critical errors. Root cause category is connection_pool.\nTrace:\nFile \"app/notification-worker/handler.py\", line 42, in process\nException: connection_pool exception occurred.",
+        "comment": {
+          "comments": [
+            {
+              "author": {
+                "displayName": "OnCall Engineer"
+              },
+              "body": "Mitigated issue by restarting notification-worker and applying runbook RB-db-pool-exhaustion."
+            }
+          ]
+        }
+      }
+    }
+  ]
+}

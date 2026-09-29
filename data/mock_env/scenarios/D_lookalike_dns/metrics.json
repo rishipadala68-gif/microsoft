@@ -1,0 +1,1 @@
+{"dns_resolution_errors_per_min": [{"ts": "2024-03-22T11:28:00Z", "value": 0}, {"ts": "2024-03-22T11:30:00Z", "value": 45}, {"ts": "2024-03-22T11:35:00Z", "value": 120}], "request_latency_p99_ms": [{"ts": "2024-03-22T11:28:00Z", "value": 60}, {"ts": "2024-03-22T11:30:00Z", "value": 5000}]}

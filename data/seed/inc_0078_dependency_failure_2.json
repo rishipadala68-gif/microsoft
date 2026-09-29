@@ -1,0 +1,18 @@
+[
+  {
+    "user": "alice",
+    "text": "@oncall inventory-service is throwing errors in prod! Sev2 incident started."
+  },
+  {
+    "user": "bob",
+    "text": "Looking at logs now. Looks like dependency_failure on inventory-service."
+  },
+  {
+    "user": "alice",
+    "text": "Found root cause in dependency_failure. Applying fix and restarting."
+  },
+  {
+    "user": "bob",
+    "text": "Resolved. Latency returned to normal."
+  }
+]

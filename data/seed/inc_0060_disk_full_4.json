@@ -1,0 +1,18 @@
+[
+  {
+    "user": "alice",
+    "text": "@oncall inventory-service is throwing errors in prod! Sev2 incident started."
+  },
+  {
+    "user": "bob",
+    "text": "Looking at logs now. Looks like disk_full on inventory-service."
+  },
+  {
+    "user": "alice",
+    "text": "Found root cause in disk_full. Applying fix and restarting."
+  },
+  {
+    "user": "bob",
+    "text": "Resolved. Latency returned to normal."
+  }
+]

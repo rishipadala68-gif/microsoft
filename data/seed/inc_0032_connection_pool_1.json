@@ -1,0 +1,21 @@
+{
+  "issues": [
+    {
+      "key": "OPS-32",
+      "fields": {
+        "summary": "Production Alert: checkout-api failure caused by connection_pool",
+        "description": "Service checkout-api reported critical errors. Root cause category is connection_pool.\nTrace:\nFile \"app/checkout-api/handler.py\", line 42, in process\nException: connection_pool exception occurred.",
+        "comment": {
+          "comments": [
+            {
+              "author": {
+                "displayName": "OnCall Engineer"
+              },
+              "body": "Mitigated issue by restarting checkout-api and applying runbook RB-db-pool-exhaustion."
+            }
+          ]
+        }
+      }
+    }
+  ]
+}

@@ -1,0 +1,18 @@
+[
+  {
+    "user": "alice",
+    "text": "@oncall web-frontend is throwing errors in prod! Sev2 incident started."
+  },
+  {
+    "user": "bob",
+    "text": "Looking at logs now. Looks like network_dns on web-frontend."
+  },
+  {
+    "user": "alice",
+    "text": "Found root cause in network_dns. Applying fix and restarting."
+  },
+  {
+    "user": "bob",
+    "text": "Resolved. Latency returned to normal."
+  }
+]

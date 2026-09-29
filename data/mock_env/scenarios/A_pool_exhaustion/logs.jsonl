@@ -1,0 +1,6 @@
+{"ts": "2024-03-15T14:20:00Z", "level": "ERROR", "service": "payment-service", "msg": "could not obtain connection from the pool", "error": "PoolError: timeout after 30000ms"}
+{"ts": "2024-03-15T14:20:05Z", "level": "ERROR", "service": "payment-service", "msg": "FATAL: remaining connection slots are reserved for non-replication superuser connections", "pool_used": 100, "pool_max": 100}
+{"ts": "2024-03-15T14:20:10Z", "level": "WARN", "service": "payment-service", "msg": "Request queue depth exceeded threshold", "queue_depth": 342}
+{"ts": "2024-03-15T14:21:00Z", "level": "ERROR", "service": "api-gateway", "msg": "Upstream payment-service returned 503", "upstream": "payment-service"}
+{"ts": "2024-03-15T14:21:30Z", "level": "INFO", "service": "payment-service", "msg": "DB connection attempt", "attempt": 1, "pool_available": 0}
+{"ts": "2024-03-15T14:22:00Z", "level": "CRITICAL", "service": "payment-service", "msg": "All connections exhausted, entering degraded mode"}

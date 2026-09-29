@@ -1,0 +1,5 @@
+{"ts": "2024-03-22T11:25:00Z", "level": "INFO", "service": "kube-dns", "msg": "pod restarted after node drain"}
+{"ts": "2024-03-22T11:30:00Z", "level": "ERROR", "service": "order-service", "msg": "dial tcp: lookup product-catalog.internal: no such host"}
+{"ts": "2024-03-22T11:30:10Z", "level": "ERROR", "service": "order-service", "msg": "DNS resolution failed for product-catalog.internal", "attempts": 3}
+{"ts": "2024-03-22T11:31:00Z", "level": "WARN", "service": "order-service", "msg": "Circuit breaker opened for product-catalog", "failures": 10}
+{"ts": "2024-03-22T11:31:30Z", "level": "INFO", "service": "order-service", "msg": "DB connection healthy, only DNS affected"}

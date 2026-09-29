@@ -1,0 +1,18 @@
+[
+  {
+    "sha": "a1b2c3d4e5f6",
+    "author": "bob@example.com",
+    "message": "feat: increase default DB pool size from 20 to 100",
+    "committed_at": "2024-03-15T10:00:00Z",
+    "changed_files": ["app/db.py", "app/config.py"],
+    "diff": "--- a/app/db.py\n+++ b/app/db.py\n@@ -10,7 +10,7 @@\n-POOL_MAX = 20\n+POOL_MAX = 100"
+  },
+  {
+    "sha": "e4f5a6b7c8d9",
+    "author": "alice@example.com",
+    "message": "fix: retry logic for payment processor",
+    "committed_at": "2024-03-14T09:00:00Z",
+    "changed_files": ["app/payments/processor.py"],
+    "diff": "--- a/app/payments/processor.py\n+++ b/app/payments/processor.py\n@@ -55,4 +55,8 @@\n+    for attempt in range(3):\n+        conn = pool.getconn()\n+        # missing: pool.putconn() on exception path"
+  }
+]

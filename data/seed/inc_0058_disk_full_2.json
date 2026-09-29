@@ -1,0 +1,21 @@
+{
+  "issues": [
+    {
+      "key": "OPS-58",
+      "fields": {
+        "summary": "Production Alert: notification-worker failure caused by disk_full",
+        "description": "Service notification-worker reported critical errors. Root cause category is disk_full.\nTrace:\nFile \"app/notification-worker/handler.py\", line 42, in process\nException: disk_full exception occurred.",
+        "comment": {
+          "comments": [
+            {
+              "author": {
+                "displayName": "OnCall Engineer"
+              },
+              "body": "Mitigated issue by restarting notification-worker and applying runbook RB-db-pool-exhaustion."
+            }
+          ]
+        }
+      }
+    }
+  ]
+}
