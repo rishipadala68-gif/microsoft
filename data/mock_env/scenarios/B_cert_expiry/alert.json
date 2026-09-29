@@ -1,0 +1,15 @@
+{
+  "alert": "FIRING",
+  "alertname": "TLSCertificateExpiringSoon",
+  "service": "api-gateway",
+  "severity": "critical",
+  "summary": "TLS certificate for api.example.com expires in 2 days",
+  "description": "Certificate CN=api.example.com, SAN=[api.example.com, www.example.com] expires at 2024-03-20T00:00:00Z. Current time is 2024-03-18T09:00:00Z. Clients will receive SSL handshake errors after expiry.",
+  "started_at": "2024-03-18T09:00:00Z",
+  "labels": {
+    "env": "production",
+    "domain": "api.example.com",
+    "expiry": "2024-03-20T00:00:00Z",
+    "issuer": "Let's Encrypt"
+  }
+}

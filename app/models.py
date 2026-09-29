@@ -62,8 +62,8 @@ class Incident(BaseModel):
     fix_worked: bool | None = None
     lessons: str | None = None
     source_docs: list[dict[str, Any]] = Field(default_factory=list)
-    symptom_text: str
-    full_text: str
+    symptom_text: str = ""
+    full_text: str = ""
     emb_symptom: list[float] = Field(default_factory=list)
     emb_full: list[float] = Field(default_factory=list)
     weight: float = 1.0
@@ -77,10 +77,16 @@ class Runbook(BaseModel):
     title: str
     body_md: str
     services: list[str] = Field(default_factory=list)
+    steps: list[str] = Field(default_factory=list)
     emb: list[float] | None = None
     success_count: int = 0
     failure_count: int = 0
     updated_at: datetime | None = None
+
+    @property
+    def success_rate(self) -> float:
+        total = self.success_count + self.failure_count
+        return self.success_count / total if total > 0 else 0.5
 
 
 class Pattern(BaseModel):
@@ -165,18 +171,23 @@ class Analysis(BaseModel):
 
 class WorkingMemoryEvent(BaseModel):
     ts: str
-    kind: Literal["alert", "log", "deploy", "message", "tool_result", "suggestion", "note", "resolve"]
+    kind: str  # "alert", "log", "deploy", "message", "tool_result", "suggestion", "note", "resolve"
     source: str
-    text: str
+    content: str = ""  # primary field used by working.py
+    text: str = ""  # backwards-compat alias
     data: dict[str, Any] = Field(default_factory=dict)
 
 
 class LiveContext(BaseModel):
-    live_id: str
+    incident_id: str = ""
+    live_id: str = ""  # backwards-compat alias
     title: str
+    status: str = "open"
+    started_at: str = ""
     services: list[str]
     events: list[WorkingMemoryEvent]
-    hypotheses: list[Hypothesis] | None = None
+    hypotheses: list[str] = Field(default_factory=list)
+    cue: "Cue | None" = None
 
 
 # --- Feedback & Stats Models ---

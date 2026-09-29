@@ -1,1 +1,2 @@
-# Incident Agent package
+"""Agent package — Claude-powered reasoning loop."""
+
